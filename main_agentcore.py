@@ -132,6 +132,7 @@ def invoke(payload: dict) -> dict:
         tmpdir = Path(tempfile.mkdtemp())
         title = concept
         result: dict
+        sb = None
 
         if image_s3_uri and extend > 0:
             # 単一画像 + 連続延長モード
@@ -174,7 +175,17 @@ def invoke(payload: dict) -> dict:
             log.info(f"storyboard: {title} / {len(sb.cuts)} cuts")
             result = run_pipeline(sb, initial_image=initial_image)
 
-        return {"title": title, "mv_path": str(result["mv"]), "s3_uri": result["s3_uri"]}
+        lipsync_cuts = [c.n for c in sb.cuts if c.is_singing] if sb else []
+        total_sec = sum(c.sec for c in sb.cuts) if sb else 0
+        return {
+            "title": title,
+            "concept": concept,
+            "lipsync_cuts": lipsync_cuts,
+            "total_sec": total_sec,
+            "music_prompt": sb.music.get("prompt", "") if sb else "",
+            "mv_path": str(result["mv"]),
+            "s3_uri": result["s3_uri"],
+        }
 
     finally:
         if S3_BUCKET:
