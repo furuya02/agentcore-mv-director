@@ -1,0 +1,25 @@
+# 秘密情報
+.env
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# 生成物（MV出力・実験フォルダ）
+output/
+out_*/
+
+# 作業用（各自の素材・一時フォルダ）
+input/
+input2/
+keep/
+
+# OS / エディタ
+.DS_Store
+
+# CDK
+cdk/node_modules/
+cdk/cdk.out/
+

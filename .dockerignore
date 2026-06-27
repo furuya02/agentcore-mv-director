@@ -1,0 +1,24 @@
+# CDK（インフラコード・ビルド成果物）
+cdk/
+
+# ドキュメント
+docs/
+README.md
+README.ja.md
+
+# Python キャッシュ
+**/__pycache__/
+**/*.pyc
+.venv/
+
+# ローカルデータ・生成物
+input/
+output/
+tmp/
+
+# 秘密情報
+.env
+
+# OS / Git
+.DS_Store
+.git/
