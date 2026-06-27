@@ -1,5 +1,7 @@
 # scripts — ローカル実行ガイド
 
+> **注意**: AgentCore Runtime のエントリポイント（`main_agentcore.py`）は **Strands Agent AIオーケストレーション** を使用しており、Claude が自律的にツールを選択します。このスクリプト群は**ローカル開発・テスト用**で、Python の固定パイプラインとして動作します。
+
 AgentCore Runtime にデプロイせず、ローカルから直接パイプラインを実行する方法です。
 `src/` のコアはローカルCLI（`scripts/`）と AgentCore Runtime（`main_agentcore.py`）で共有されています。
 
