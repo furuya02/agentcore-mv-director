@@ -1,4 +1,4 @@
-"""絵コンテ（Storyboard）の構造化スキーマと、ドライラン用のスタブ生成。"""
+"""絵コンテ（Storyboard）の構造化スキーマ。"""
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -118,28 +118,3 @@ def storyboard_from_images(images: list[Path], concept: str,
 
     return Storyboard(title="Image MV", concept=concept, music=music, cuts=cuts)
 
-
-def stub_storyboard(concept: str) -> Storyboard:
-    """ドライラン用：LLM を呼ばずに固定の絵コンテを返す（課金なし）。"""
-    return Storyboard(
-        title="Tokyo Midnight Drive",
-        concept=concept,
-        music={
-            "prompt": "80s Japanese city pop, dreamy synths, slow groove, female vocal",
-            "lyrics": "[Verse]\nNeon rain on the empty street\n[Chorus]\nDrive me through the Tokyo night",
-            "length_ms": 18000,  # 動画合計(8+5+5=18s)に合わせる
-        },
-        cuts=[
-            # 1カット目は前奏に対応する情景ショット（is_singing=False）
-            Cut(1, 8, "fal-ai/pixverse/v5/text-to-video",
-                "Neon-lit Tokyo street at night, slow cinematic pan, city pop mood, no people",
-                False),
-            # 2カット目から歌唱カット（前奏明けのAメロに対応）
-            Cut(2, 5, "fal-ai/pixverse/v5/image-to-video",
-                "Close-up portrait of the same young woman singing to the camera, "
-                "face clearly visible, gentle head movement, soft neon city bokeh at night",
-                True),
-            Cut(3, 5, "fal-ai/pixverse/v5/image-to-video",
-                "The same young woman, slow cinematic push-in, city pop night mood", False),
-        ],
-    )

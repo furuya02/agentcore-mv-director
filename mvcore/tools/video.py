@@ -10,7 +10,7 @@ import subprocess
 import time
 import httpx
 from pathlib import Path
-from ..config import DRY_RUN, FAL_KEY, FFMPEG, OUTPUT_DIR, write_placeholder, reuse_existing
+from ..config import FAL_KEY, FFMPEG, OUTPUT_DIR
 from ._fal import video_url
 
 QUEUE = "https://queue.fal.run"
@@ -30,12 +30,6 @@ def generate_video(model: str, prompt: str, sec: int, n: int,
                    start_image: Path | None = None) -> Path:
     """1カット動画(mp4)を生成して返す。start_image があれば連鎖の開始フレームに使う。"""
     out = OUTPUT_DIR / f"cut{n}.mp4"
-    if reuse_existing(out):
-        return out
-    if DRY_RUN or not FAL_KEY:
-        chain = f" (chained from {start_image.name})" if start_image else ""
-        return write_placeholder(out, f"fal video [{model}] {sec}s: {prompt}{chain}")
-
     payload: dict = {"prompt": prompt}
     if "pixverse" in model:  # PixVerse v5：解像度と長さ(5/8s)を指定
         payload.update({
@@ -63,10 +57,6 @@ EXTEND_MODEL = "fal-ai/pixverse/extend"
 def extend_video(video: Path, prompt: str, n: int) -> Path:
     """既存動画の続きを PixVerse extend で生成（+8秒・連続）。出力は cut{n}.mp4。"""
     out = OUTPUT_DIR / f"cut{n}.mp4"
-    if reuse_existing(out):
-        return out
-    if DRY_RUN or not FAL_KEY:
-        return write_placeholder(out, f"pixverse extend +8s from {video.name}: {prompt}")
     payload = {
         "video_url": _upload(video),
         "prompt": prompt,
@@ -103,8 +93,6 @@ def prepare_image(image: Path) -> Path:
 
     LTX 系の image-to-video は入力画像のアスペクト比を踏襲するため、3:2 に切れば 3:2 で出力される。
     """
-    if DRY_RUN or not FAL_KEY:
-        return image
     out = OUTPUT_DIR / "_input_3x2.png"
     subprocess.run(
         [FFMPEG, "-y", "-i", str(image),
@@ -117,8 +105,6 @@ def prepare_image(image: Path) -> Path:
 def extract_last_frame(video: Path, n: int) -> Path:
     """動画の最終フレームを PNG（可逆）で抽出（連鎖のガクつき防止）。"""
     out = OUTPUT_DIR / f"cut{n}_last.png"
-    if DRY_RUN or not FAL_KEY:
-        return write_placeholder(out, f"last frame of {video.name}")
     subprocess.run(
         [FFMPEG, "-y", "-sseof", "-0.1", "-i", str(video), "-update", "1", str(out)],
         check=True,
