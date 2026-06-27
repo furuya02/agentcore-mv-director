@@ -20,8 +20,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY mvcore/ ./mvcore/
 COPY main.py ./main.py
 
-RUN useradd -m -u 1000 bedrock_agentcore
-USER bedrock_agentcore
+RUN useradd -m -u 1000 appuser
+USER appuser
 
 EXPOSE 8080
 
