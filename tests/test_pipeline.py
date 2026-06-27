@@ -12,8 +12,8 @@ os.environ["OUTPUT_DIR"] = tempfile.mkdtemp()  # 本番 output/ を汚さない
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import pytest  # noqa: E402
-from src.schema import stub_storyboard, validate_storyboard  # noqa: E402
-from src.pipeline import run_pipeline  # noqa: E402
+from mvcore.schema import stub_storyboard, validate_storyboard  # noqa: E402
+from mvcore.pipeline import run_pipeline  # noqa: E402
 
 
 def test_dryrun_pipeline_produces_mv():
