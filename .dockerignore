@@ -1,24 +1,27 @@
-# CDK のビルド成果物（無限ループ防止）
-cdk/cdk.out/
-cdk/node_modules/
+# CDK（インフラコード・ビルド成果物）
+cdk/
+
+# ドキュメント
+docs/
+README.md
+README.ja.md
 
 # Python キャッシュ
 **/__pycache__/
 **/*.pyc
 .venv/
-.pytest_cache/
 
-# 生成物・素材（コンテナ不要）
-output/
-out_*/
+# ローカルデータ・生成物
 input/
 input2/
+output/
+out_*/
 keep/
+tmp/
 
 # 秘密情報
 .env
-.env.example
 
-# OS
+# OS / Git
 .DS_Store
 .git/
