@@ -1,23 +1,23 @@
 <mxfile host="65bd71144e">
     <diagram id="agentcore-mv-director-migrated" name="architecture-agentcore">
-        <mxGraphModel dx="1442" dy="775" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1320" pageHeight="780" math="0" shadow="0">
+        <mxGraphModel dx="1839" dy="784" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1320" pageHeight="780" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
                 <mxCell id="awscloud" value="AWS Cloud" style="sketch=0;shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_aws_cloud_alt;container=0;collapsible=0;strokeColor=#232F3E;fillColor=none;verticalAlign=top;align=left;spacingLeft=30;fontColor=#232F3E;fontSize=12;html=1;" parent="1" vertex="1">
-                    <mxGeometry x="180" y="60" width="799" height="664" as="geometry"/>
+                    <mxGeometry x="180" y="60" width="736" height="664" as="geometry"/>
                 </mxCell>
                 <mxCell id="region" value="Region (ap-northeast-1)" style="sketch=0;shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_region;container=0;collapsible=0;strokeColor=#00A4A6;dashed=1;fillColor=none;verticalAlign=top;align=left;spacingLeft=30;fontColor=#00A4A6;fontSize=12;html=1;" parent="1" vertex="1">
-                    <mxGeometry x="210" y="110" width="750" height="560" as="geometry"/>
+                    <mxGeometry x="210" y="110" width="674" height="560" as="geometry"/>
                 </mxCell>
                 <mxCell id="agentcore" value="Amazon Bedrock AgentCore" style="rounded=1;dashed=1;strokeColor=#01A88D;fillColor=none;verticalAlign=top;align=left;spacingLeft=12;fontColor=#01A88D;fontSize=12;html=1;" parent="1" vertex="1">
                     <mxGeometry x="230" y="140" width="400" height="400" as="geometry"/>
                 </mxCell>
                 <mxCell id="extgroup" value="External APIs (non-AWS)" style="rounded=1;dashed=1;strokeColor=#999999;fillColor=none;verticalAlign=top;align=left;spacingLeft=12;fontColor=#777777;fontSize=12;html=1;" parent="1" vertex="1">
-                    <mxGeometry x="1030" y="150" width="260" height="480" as="geometry"/>
+                    <mxGeometry x="952" y="184" width="213" height="374" as="geometry"/>
                 </mxCell>
                 <mxCell id="user" value="ユーザー&#xa;（入力画像をS3へ&#xa;＋起動）" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#232F3E;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;shape=mxgraph.aws4.user;" parent="1" vertex="1">
-                    <mxGeometry x="60" y="345" width="60" height="60" as="geometry"/>
+                    <mxGeometry x="34" y="323" width="60" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="bedrock" value="Amazon Bedrock&#xa;Claude（オーケストレーション&#xa;＋コンセプト生成・リップシンク判定・作詞）" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#01A88D;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.bedrock;" parent="1" vertex="1">
                     <mxGeometry x="360" y="180" width="60" height="60" as="geometry"/>
@@ -26,22 +26,22 @@
                     <mxGeometry x="355" y="320" width="70" height="70" as="geometry"/>
                 </mxCell>
                 <mxCell id="codeinterp" value="AgentCore Runtime&#xa;コンテナ内 FFmpeg" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#01A88D;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.bedrock;" parent="1" vertex="1">
-                    <mxGeometry x="360" y="460" width="60" height="60" as="geometry"/>
+                    <mxGeometry x="360" y="461" width="60" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="cloudwatch" value="CloudWatch&#xa;Observability（思考トレース）" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#E7157B;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.cloudwatch;" parent="1" vertex="1">
                     <mxGeometry x="660" y="180" width="60" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="secrets" value="Secrets Manager&#xa;APIキー保管" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#DD344C;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.secrets_manager;" parent="1" vertex="1">
-                    <mxGeometry x="260" y="590" width="60" height="60" as="geometry"/>
+                    <mxGeometry x="259" y="517" width="60" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="s3" value="Amazon S3&#xa;入力画像（input/）&#xa;ロック・完成MV出力（output/）" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#7AA116;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.s3;" parent="1" vertex="1">
                     <mxGeometry x="760" y="590" width="60" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="elevenlabs" value="ElevenLabs&#xa;Music v2&#xa;（楽曲・歌入り）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#333333;fontColor=#111111;fontSize=11;" parent="1" vertex="1">
-                    <mxGeometry x="1050" y="190" width="170" height="70" as="geometry"/>
+                    <mxGeometry x="976" y="220" width="170" height="70" as="geometry"/>
                 </mxCell>
                 <mxCell id="falai" value="fal.ai（ハブ）&#xa;PixVerse v5 i2v / extend&#xa;Kling LipSync" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#333333;fontColor=#111111;fontSize=11;" parent="1" vertex="1">
-                    <mxGeometry x="1050" y="330" width="170" height="80" as="geometry"/>
+                    <mxGeometry x="979" y="446" width="170" height="80" as="geometry"/>
                 </mxCell>
                 <mxCell id="e1" value="①入力画像（S3）&#xa;＋起動（ペイロード省略可）" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;strokeColor=#1565C0;fontColor=#1565C0;strokeWidth=2;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" parent="1" source="user" target="runtime" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
@@ -50,17 +50,21 @@
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="e3" value="③楽曲生成" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;strokeColor=#AD1457;fontColor=#AD1457;strokeWidth=2;exitX=1;exitY=0.25;entryX=0;entryY=0.5;" parent="1" source="runtime" target="elevenlabs" edge="1">
-                    <mxGeometry relative="1" as="geometry">
+                    <mxGeometry x="-0.2865" relative="1" as="geometry">
                         <Array as="points">
-                            <mxPoint x="1040" y="338"/>
+                            <mxPoint x="850" y="338"/>
+                            <mxPoint x="850" y="255"/>
                         </Array>
+                        <mxPoint as="offset"/>
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="e4" value="④動画生成・延長・リップシンク" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;strokeColor=#AD1457;fontColor=#AD1457;strokeWidth=2;exitX=1;exitY=0.75;entryX=0;entryY=0.5;" parent="1" source="runtime" target="falai" edge="1">
-                    <mxGeometry relative="1" as="geometry">
+                    <mxGeometry x="-0.3169" y="3" relative="1" as="geometry">
                         <Array as="points">
-                            <mxPoint x="1040" y="373"/>
+                            <mxPoint x="850" y="373"/>
+                            <mxPoint x="850" y="486"/>
                         </Array>
+                        <mxPoint y="1" as="offset"/>
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="e5" value="⑤連結・音声合成" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;strokeColor=#2E7D32;fontColor=#2E7D32;strokeWidth=2;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" parent="1" source="runtime" target="codeinterp" edge="1">
