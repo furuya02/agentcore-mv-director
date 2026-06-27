@@ -4,5 +4,3 @@ httpx
 boto3
 fal-client
 opencv-python  # 複数画像モードの顔検出
-# dev（ドライランテスト用）
-pytest

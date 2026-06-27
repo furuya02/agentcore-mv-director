@@ -1,10 +1,6 @@
-"""絵コンテ（Storyboard）を受け取り、MV を組み立てるオーケストレーション。
-
-Director Agent もドライランスクリプトも、この run_pipeline を共通で使う。
-"""
-import math
+"""絵コンテ（Storyboard）を受け取り、MV を組み立てるオーケストレーション。"""
 from pathlib import Path
-from .schema import Storyboard, validate_storyboard, stub_storyboard
+from .schema import Storyboard, validate_storyboard
 from .tools import (
     generate_music, generate_video, extend_video, extract_last_frame, prepare_image,
     lipsync, assemble_mv, slice_audio, cut_segment, upload_to_s3,
@@ -12,43 +8,6 @@ from .tools import (
 
 I2V_MODEL = "fal-ai/pixverse/v5/image-to-video"
 SEG_SEC = 8  # PixVerse の1クリップ秒数（i2v / extend / リップシンク分割の単位）
-
-
-def run_image_extend(initial_image: Path, concept: str, extend_count: int,
-                     vocal: str | None = None) -> dict:
-    """1枚の画像から連続動画を作り、全編を 8秒チャンクごとにリップシンクする。
-
-    1) 画像 → i2v 8秒 → extend で連続延長（累積動画。最後の extend 出力が完成形）
-    2) その連続動画を 8秒ごとに分割し、各チャンクをその時間帯の歌声でリップシンク
-    3) リップシンク済みチャンクを連結＋楽曲合成 → 連続性を保ったまま全編で口が歌に同期
-    """
-    total_sec = SEG_SEC * (1 + extend_count)
-    sb = stub_storyboard(concept)  # 楽曲プロンプト/歌詞を流用
-    music_prompt = sb.music["prompt"]
-    if vocal:  # ボーカル性別の指定があれば反映
-        import re
-        music_prompt = re.sub(r"\b(male|female)\s+vocals?\b", "", music_prompt, flags=re.I).strip().strip(",").strip()
-        music_prompt = f"{music_prompt}, {vocal} vocal"
-    music = generate_music(music_prompt, sb.music["lyrics"], total_sec * 1000)
-
-    # 1) 連続動画（PixVerse extend は累積動画を返すので最後の出力が完成形）
-    img = prepare_image(initial_image)
-    final = generate_video(I2V_MODEL, sb.cuts[0].prompt, SEG_SEC, 1, start_image=img)
-    for k in range(extend_count):
-        final = extend_video(final, "continue the same scene seamlessly, cinematic, city pop night mood", k + 2)
-
-    # 2) 全編リップシンク：8秒ごとに分割→各チャンクをその時間帯の歌声で口元同期
-    segments: list[Path] = []
-    for i in range(math.ceil(total_sec / SEG_SEC)):
-        start = i * SEG_SEC
-        dur = min(SEG_SEC, total_sec - start)
-        chunk = cut_segment(final, start, dur, i + 1)
-        seg_audio = slice_audio(music, start, dur, 200 + i)
-        segments.append(lipsync(chunk, seg_audio, 200 + i))
-
-    # 3) 連結＋楽曲合成
-    mv = assemble_mv(segments, music)
-    return {"mv": mv, "s3_uri": upload_to_s3(mv)}
 
 
 def run_pipeline(sb: Storyboard, initial_image: Path | None = None) -> dict:
