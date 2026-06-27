@@ -14,12 +14,11 @@ ENV UV_SYSTEM_PYTHON=1 \
     PYTHONUNBUFFERED=1 \
     OUTPUT_DIR=/tmp/output
 
-# src/ をリポジトリ直下から直接 COPY（sync 不要）
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY src/ ./mvcore/
-COPY main_agentcore.py ./main.py
+COPY mvcore/ ./mvcore/
+COPY main.py ./main.py
 
 RUN useradd -m -u 1000 bedrock_agentcore
 USER bedrock_agentcore

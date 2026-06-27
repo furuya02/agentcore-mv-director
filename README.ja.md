@@ -22,19 +22,18 @@ S3 に画像を置いて空のペイロードを送るだけで、**Strands Agen
 ## 構成
 
 ```
-main_agentcore.py             # AgentCore エントリポイント — Strands Agent + 4ツール
+main.py                       # AgentCore エントリポイント — Strands Agent + 4ツール
   ├─ download_input_images    # S3 input/ から画像をダウンロード
   ├─ generate_mv_concept      # Claude vision → MVコンセプト生成
   ├─ generate_music_and_lyrics # Claude → 楽曲スタイル＋歌詞生成
   └─ produce_music_video      # 絵コンテ組み立て＋パイプライン実行 → S3出力
-src/
+mvcore/
   director.py       # Bedrock（Claude）— コンセプト生成・リップシンク判定・絵コンテ・作詞
   pipeline.py       # 絵コンテ → MV のパイプライン
   schema.py         # 絵コンテ(Storyboard)スキーマ・検証
   config.py         # 設定（キー無しなら自動ドライラン）
   tools/            # music / video / lipsync / assemble / storage（S3）
 cdk/                # S3 / Secrets Manager / IAM / AgentCore Runtime（TypeScript）
-scripts/            # ローカル実行（開発・テスト用）
 ```
 
 ## セットアップ

@@ -22,19 +22,18 @@ Place images in S3 and send an empty payload — **Strands Agent (Claude) autono
 ## Layout
 
 ```
-main_agentcore.py        # AgentCore entrypoint — Strands Agent + 4 tools
+main.py                  # AgentCore entrypoint — Strands Agent + 4 tools
   ├─ download_input_images    # Download images from S3 input/
   ├─ generate_mv_concept      # Claude vision → MV concept
   ├─ generate_music_and_lyrics # Claude → music style + lyrics
   └─ produce_music_video      # Storyboard + pipeline → S3 upload
-src/
+mvcore/
   director.py            # Bedrock (Claude) — concept / lipsync judgment / lyrics
   pipeline.py            # storyboard -> MV pipeline
   schema.py              # Storyboard schema / validation
   config.py              # config (auto dry-run when keys are absent)
   tools/                 # music / video / lipsync / assemble / storage (S3)
 cdk/                     # S3 / Secrets Manager / IAM / AgentCore Runtime (TypeScript)
-scripts/                 # Local execution (development / testing)
 ```
 
 ## Setup

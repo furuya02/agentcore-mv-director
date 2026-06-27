@@ -63,10 +63,10 @@ export class AgentcoreMvDirectorStack extends Stack {
       },
     });
 
-    // コンテナイメージ：リポジトリ直下を buildContext にして src/ を直接 COPY
+    // コンテナイメージ：リポジトリ直下を buildContext にして mvcore/ を直接 COPY
     const artifact = agentcore.AgentRuntimeArtifact.fromAsset(
       path.join(__dirname, "..", ".."),  // リポジトリ直下（cdk/lib/ → cdk/ → ./）
-      { file: "Dockerfile.agentcore" }          // src/ を直接 COPY できる Dockerfile
+      { file: "Dockerfile.agentcore" }          // mvcore/ を直接 COPY できる Dockerfile
     );
 
     // AgentCore Runtime
