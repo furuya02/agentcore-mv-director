@@ -14,6 +14,10 @@ Place images in S3 and send an empty payload — the agent automatically generat
 - **Observability**: CloudWatch logs + OpenTelemetry traces (AgentCore built-in)
 - **Concurrency guard**: S3 lock file prevents duplicate invocations (fal.ai / ElevenLabs cost protection)
 
+## Architecture
+
+![Architecture](docs/architecture-agentcore.png)
+
 ## Layout
 
 ```
