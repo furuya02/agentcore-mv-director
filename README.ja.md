@@ -1,104 +1,45 @@
 # agentcore-mv-director
 
 Amazon Bedrock AgentCore 上で動く「クリエイティブ・ディレクター」AIエージェント。
-1つのコンセプト（例：「夜の東京を舞台にしたシティポップのMV」）から、絵コンテと歌詞を生成し、
-複数カットの動画＋楽曲を自動生成して1本のMVに仕上げる PoC です。
+S3 に画像を置いて空のペイロードを送るだけで、エージェントが自動でコンセプトを生成し、
+複数カットの動画＋楽曲を生成して1本のMVに仕上げます（PoC）。
 
-- Director Agent（Strands Agents / Python）が絵コンテ＋作詞を構造化出力
-- 楽曲：ElevenLabs Music v2（歌入り）
-- 動画：fal.ai（カット別モデル、last frame→次カット開始フレームの連鎖）
-- 歌唱カット：fal.ai Kling LipSync（ステム分離不要・フルミックスで同期）
-- 連結：FFmpeg（AgentCore Code Interpreter 想定）
-- 出力：Amazon S3／思考トレースは CloudWatch（AgentCore Observability）で可視化
-
-アーキテクチャ図：[../Blog/architecture.png](../Blog/architecture.png)（編集元: `../Blog/architecture.drawio`）
+- **コンセプト自動生成**: Claude vision が入力画像を分析してMVコンセプトを自動生成
+- **リップシンク自動判定**: Claude vision が各画像を分析し、人物がカメラ目線でアップに映っているカットのみリップシンクを適用（ファイル名の命名規則不要）
+- **作詞**: Bedrock（Claude）がコンセプトに合う英語歌詞をオリジナルで生成
+- **楽曲**: ElevenLabs Music v2（デフォルトは女性ボーカル）
+- **動画**: fal.ai PixVerse v5 image-to-video（カット別）
+- **リップシンク**: fal.ai Kling LipSync（フルミックス対応・ステム分離不要）
+- **連結**: FFmpeg
+- **出力**: Amazon S3（`output/mv.mp4`）
+- **Observability**: CloudWatch ログ＋ OpenTelemetry トレース（AgentCore 組み込み）
+- **二重実行防止**: S3 ロックファイルで並列 invocation をブロック（fal.ai / ElevenLabs の課金保護）
 
 ## 構成
 
 ```
+main_agentcore.py   # AgentCore エントリポイント（@app.entrypoint）
 src/
-  agent.py        # AgentCore エントリポイント（Strands Director Agent）
-  pipeline.py     # 絵コンテ → MV のオーケストレーション（バリデーション込み）
-  schema.py       # 絵コンテ(Storyboard)スキーマ・検証・スタブ
-  config.py       # 設定（キー無しなら自動ドライラン）
-  tools/          # music / video / lipsync / assemble / storage(S3)
-scripts/
-  dryrun.py       # 常に課金なしの疎通確認（鍵があっても叩かない）
-  test_music.py   # (a) 最小コスト実APIテスト（ElevenLabs 楽曲1本）
-  test_video.py   # (b) 最小コスト実APIテスト（fal LTX 動画1カット）
-  run.py          # (c) 実APIでフルパイプライン1本（課金あり）
-tests/            # ドライランの自動テスト（pytest）
-cdk/              # S3 / Secrets Manager / IAM（TypeScript）
+  director.py       # Bedrock（Claude）— コンセプト生成・リップシンク判定・絵コンテ・作詞
+  pipeline.py       # 絵コンテ → MV のオーケストレーション
+  schema.py         # 絵コンテ(Storyboard)スキーマ・検証
+  config.py         # 設定（キー無しなら自動ドライラン）
+  tools/            # music / video / lipsync / assemble / storage（S3）
+cdk/                # S3 / Secrets Manager / IAM / AgentCore Runtime（TypeScript）
 ```
 
 ## セットアップ
 
-```bash
-git clone <REPO_URL>
-cd agentcore-mv-director
-python3 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-```
-
-## 動作確認（ドライラン・課金なし）
-
-APIキーが無くても、パイプライン全体がプレースホルダで流れます。
+### 1. Clone & CDK デプロイ
 
 ```bash
-DRY_RUN=1 python -m scripts.dryrun
-```
-
-`output/` に各カット・楽曲・完成MVのプレースホルダが生成され、処理の流れを確認できます。
-
-### テスト（課金なし）
-
-```bash
-python -m pytest -q
-```
-
-ドライランでパイプライン疎通と絵コンテのバリデーション（歌唱カット必須・作詞必須など）を検証します。
-
-## 実行（実API・従量課金）
-
-鍵は **ツールごとに判定**されます（`ELEVENLABS_API_KEY` のみ設定すれば楽曲だけ実行、
-`FAL_KEY` 未設定なら動画はプレースホルダ）。`scripts/dryrun.py` は鍵があっても課金しません。
-
-```bash
-cp .env.example .env   # キーを記入
-set -a && source .env && set +a
-
-# (a) ElevenLabs 楽曲1本（概算 $0.03）
-python -m scripts.test_music
-
-# (b) fal LTX 動画1カット（概算 $0.04）
-python -m scripts.test_video
-
-# (c) フルパイプライン（LTX×3カット＋リップシンク。概算 $0.1〜）
-python -m scripts.run "夜の東京のシティポップ"
-
-# (c') 単一の初期画像から開始（全カットをその画像から生成し、人物・画風を固定）
-python -m scripts.run "夜の東京のシティポップ" --image input/first.png
-
-# (c'') 複数画像モード（input/ の各画像=1カット。顔が検出された画像のみリップシンク）
-python -m scripts.run "夜の東京のシティポップ" --images input
-
-# (c''') 1画像→連続生成モード（i2v 8秒[先頭リップシンク]＋extend×N で1本の連続動画）
-python -m scripts.run "夜の東京のシティポップ" --image input/first0.png --extend 2
-```
-
-## AWSリソース（CDK）
-
-S3バケット（MV出力先）・Secrets Manager（APIキー）・IAMポリシーを CDK で作成する。
-※エージェント本体のデプロイは CDK ではなく AgentCore CLI（後述）。
-
-```bash
-cd cdk
+git clone https://github.com/furuya02/agentcore-mv-director.git
+cd agentcore-mv-director/cdk
 pnpm install
-# 命名は agentcore-mv-director-{アカウントID}。-c bucket_suffix=YYYYMMDD で差し替え可。
-pnpm exec cdk deploy -c bucket_suffix=20260623
+pnpm run cdk deploy -- --require-approval never
 ```
 
-デプロイ後、APIキーを Secrets Manager に投入：
+### 2. APIキーを Secrets Manager に投入
 
 ```bash
 aws secretsmanager put-secret-value \
@@ -106,42 +47,65 @@ aws secretsmanager put-secret-value \
   --secret-string '{"FAL_KEY":"...","ELEVENLABS_API_KEY":"..."}'
 ```
 
-出力（Outputs）の `RuntimePolicyArn` を AgentCore Runtime の実行ロールにアタッチする。
-
-片付け（放置コスト回避）：
+### 3. 入力画像を S3 にアップロード
 
 ```bash
-pnpm exec cdk destroy
+aws s3 cp input/ s3://agentcore-mv-director-<ACCOUNT_ID>/input/ --recursive
 ```
 
-## デプロイ（AgentCore CLI）
+ファイル名は自由です。Claude vision が各画像を分析してリップシンク対象を自動判定するため、
+`_sing` などの命名規則は不要です。
 
-エージェント本体は AgentCore CLI（`@aws/agentcore`）でデプロイ。※npm/npx は使わず pnpm を使用。
+## 実行
 
 ```bash
-pnpm add -g @aws/agentcore
-agentcore deploy
-agentcore invoke '{"concept": "夜の東京を舞台にしたシティポップのMV"}'
+echo '{}' > /tmp/payload.json
+
+aws bedrock-agentcore invoke-agent-runtime \
+  --agent-runtime-arn "<RUNTIME_ARN>" \
+  --payload fileb:///tmp/payload.json \
+  --cli-read-timeout 0 \
+  --region ap-northeast-1 \
+  /tmp/response.json && cat /tmp/response.json
 ```
 
-## Observability（思考トレースの可視化）
+空ペイロード `{}` のデフォルト動作：
 
-AgentCore Runtime にデプロイしたエージェントは OpenTelemetry で自動計装され、
-絵コンテ判断・モデル選択・ツール呼び出しのトレースを CloudWatch で確認できます。
+| ステップ | 内容 |
+|---------|------|
+| 画像 | `s3://<bucket>/input/` から自動取得 |
+| コンセプト | Claude vision が全画像を分析して自動生成 |
+| リップシンク | Claude vision が各画像を判定 — カメラ目線のアップ → リップシンク適用 |
+| 作詞 | Bedrock がコンセプトに合う英語歌詞をオリジナル生成 |
+| ボーカル | 女性ボーカル |
 
-1. アカウントで一度だけ CloudWatch Transaction Search を有効化（初回のみ）：
-   ```bash
-   aws xray update-trace-segment-destination --destination CloudWatchLogs
-   ```
-   （コンソールの場合：CloudWatch → Settings → Transaction Search → Enable）
-2. `agentcore deploy` でデプロイ（OTel 自動計装。追加ライブラリ不要）
-3. CloudWatch コンソールの「GenAI Observability」→ Trace View で、エージェントの
-   思考過程・ツール呼び出しのタイムラインを確認
+### ペイロードパラメータ（全て省略可能）
 
-ログは `/aws/bedrock-agentcore/runtimes/<agent_id>-<endpoint>/...` に出力されます。
+| パラメータ | デフォルト | 説明 |
+|-----------|-----------|------|
+| `concept` | 自動生成（画像から） | コンセプトを手動で指定する場合 |
+| `images_s3_prefix` | `s3://<bucket>/input/` | 入力画像の S3 プレフィックス |
+| `ai_lyrics` | `true` | Bedrock で歌詞を自動生成 |
+| `vocal` | `"female"` | `"male"` または `"female"` |
+| `length` | `24` | MV の長さ（秒）単一画像モード時 |
 
-## コストと注意
+## Observability
 
-- 動画生成は試行回数でコストが伸びます。実API実行前に生成回数・上限を決めてください。
-- AgentCore は消費ベース課金（I/O待機は無課金）。常駐課金はありません。
-- 生成楽曲は MV 内 BGM 用途のみ。音楽配信サービスへの楽曲投稿は不可（ElevenLabs 規約）。
+```bash
+aws logs tail "/aws/bedrock-agentcore/runtimes/<agent_id>-DEFAULT" \
+  --follow --format short --region ap-northeast-1
+```
+
+## 片付け（放置コスト回避）
+
+```bash
+cd cdk && pnpm run cdk destroy
+```
+
+## コスト
+
+- 動画生成: カットあたり $0.05〜0.10（fal.ai PixVerse v5）
+- リップシンク: 歌唱カットあたり $0.05（fal.ai Kling）
+- 楽曲生成: 1トラックあたり $0.03（ElevenLabs Music v2）
+- AgentCore: 消費ベース課金（I/O 待機は無課金）
+- 生成楽曲はMV内BGM用途のみ。音楽配信サービスへの楽曲投稿は不可（ElevenLabs 規約）
