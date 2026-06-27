@@ -1,5 +1,7 @@
 # scripts — Local execution guide
 
+> **Note**: The AgentCore Runtime endpoint (`main_agentcore.py`) uses **Strands Agent AI orchestration** — Claude autonomously decides which tools to call. These scripts are for **local development and testing** and run the pipeline directly with explicit Python control.
+
 Run the pipeline directly from your local machine without deploying to AgentCore Runtime.
 The same `src/` core is shared by both local CLI (`scripts/`) and AgentCore Runtime (`main_agentcore.py`).
 

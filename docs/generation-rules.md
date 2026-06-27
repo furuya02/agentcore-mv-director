@@ -48,11 +48,24 @@
 複数シーンは最後に連結して1本のMVへ。
 ```
 
-## コマンド対応
+## AgentCore Runtime（AI オーケストレーション）での動作
 
-- 複数画像（各画像＝1シーン、extend で延長、顔ありは全編リップシンク）：
-  - `python -m scripts.run "コンセプト" --images input --extend 1`
-  - `--extend 0` なら各シーン8秒、`--extend 1` なら各シーン16秒。
+AgentCore Runtime は **Strands Agent（Claude）** が 4 つのツールを自律的に呼び出す構成です。
+S3 の `input/` に画像を置いて空ペイロードを送るだけで、上記ルールに従って Claude が自動的に処理します。
+
+```bash
+echo '{}' | aws bedrock-agentcore invoke-agent-runtime \
+  --agent-runtime-arn "<RUNTIME_ARN>" \
+  --payload fileb:///tmp/payload.json ...
+```
+
+## ローカル実行（scripts/）でのコマンド対応
+
+ローカル開発・テスト時は Python 固定パイプライン（`scripts/run.py`）を使います：
+
+- 複数画像（各画像＝1シーン）：
+  - `python -m scripts.run "コンセプト" --images input`
+  - `--ai-lyrics` を付けると Bedrock で歌詞を自動生成
 - 単一画像から連続生成：`python -m scripts.run "コンセプト" --image input/001.png --extend 2`
 - 出力先を分ける：先頭に `OUTPUT_DIR=フォルダ名` を付ける。
 - 途中再開／再利用：先頭に `REUSE=1`。

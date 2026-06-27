@@ -1,8 +1,9 @@
 # agentcore-mv-director
 
 A "creative director" AI agent running on Amazon Bedrock AgentCore.
-Place images in S3 and send an empty payload — the agent automatically generates a concept from the images, produces lyrics, generates multi-cut video plus a song, and assembles them into one music video (PoC).
+Place images in S3 and send an empty payload — **Strands Agent (Claude) autonomously orchestrates** concept generation, lyrics, multi-cut video, and music into one finished MV (PoC).
 
+- **AI orchestration**: Strands Agent (Claude) decides which tools to call and in what order
 - **Concept**: Claude vision analyzes input images and auto-generates the MV concept
 - **Lipsync detection**: Claude vision judges per-image whether the person is facing the camera in close-up — only those cuts get lipsync applied (no filename convention needed)
 - **Lyrics**: Bedrock (Claude) generates original English lyrics matching the concept
@@ -21,14 +22,19 @@ Place images in S3 and send an empty payload — the agent automatically generat
 ## Layout
 
 ```
-main_agentcore.py   # AgentCore entrypoint (@app.entrypoint)
+main_agentcore.py        # AgentCore entrypoint — Strands Agent + 4 tools
+  ├─ download_input_images    # Download images from S3 input/
+  ├─ generate_mv_concept      # Claude vision → MV concept
+  ├─ generate_music_and_lyrics # Claude → music style + lyrics
+  └─ produce_music_video      # Storyboard + pipeline → S3 upload
 src/
-  director.py       # Bedrock (Claude) — concept / lipsync judgment / storyboard / lyrics
-  pipeline.py       # storyboard -> MV orchestration
-  schema.py         # Storyboard schema / validation
-  config.py         # config (auto dry-run when keys are absent)
-  tools/            # music / video / lipsync / assemble / storage (S3)
-cdk/                # S3 / Secrets Manager / IAM / AgentCore Runtime (TypeScript)
+  director.py            # Bedrock (Claude) — concept / lipsync judgment / lyrics
+  pipeline.py            # storyboard -> MV pipeline
+  schema.py              # Storyboard schema / validation
+  config.py              # config (auto dry-run when keys are absent)
+  tools/                 # music / video / lipsync / assemble / storage (S3)
+cdk/                     # S3 / Secrets Manager / IAM / AgentCore Runtime (TypeScript)
+scripts/                 # Local execution (development / testing)
 ```
 
 ## Setup
@@ -56,8 +62,8 @@ aws secretsmanager put-secret-value \
 aws s3 cp input/ s3://agentcore-mv-director-<ACCOUNT_ID>/input/ --recursive
 ```
 
-Image naming: any filename is fine. Claude vision automatically determines which images are
-close-up / camera-facing (lipsync targets) — no special naming convention required.
+Image naming: number your files (`1.jpg`, `2.jpg`, …) — they are processed in ascending numeric order.
+Claude vision automatically determines which images are close-up / camera-facing (lipsync targets).
 
 ## Invoke
 
@@ -72,31 +78,38 @@ aws bedrock-agentcore invoke-agent-runtime \
   /tmp/response.json && cat /tmp/response.json
 ```
 
-Default behavior with empty payload `{}`:
+An empty payload `{}` is all that is needed. Strands Agent (Claude) handles everything automatically:
 
-| Step | What happens |
-|------|-------------|
-| Images | Loaded from `s3://<bucket>/input/` automatically |
+| Step | What Claude decides |
+|------|---------------------|
+| Images | Loaded from `s3://<bucket>/input/` in numeric filename order |
 | Concept | Claude vision analyzes all images and generates the concept |
+| Music & Lyrics | Claude generates music style + original English lyrics from the concept |
 | Lipsync | Claude vision judges each image — close-up + camera-facing → lipsync applied |
-| Lyrics | Bedrock generates original English lyrics matching the concept |
-| Vocal | Female vocal |
-
-### Payload parameters (all optional)
-
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `concept` | auto (from images) | Override the auto-generated concept |
-| `images_s3_prefix` | `s3://<bucket>/input/` | S3 prefix for input images |
-| `ai_lyrics` | `true` | Generate lyrics with Bedrock |
-| `vocal` | `"female"` | `"male"` or `"female"` |
-| `length` | `24` | Total MV length in seconds (single-image mode) |
+| Vocal | Female vocal (fixed) |
 
 ## Observability
 
 ```bash
 aws logs tail "/aws/bedrock-agentcore/runtimes/<agent_id>-DEFAULT" \
   --follow --format short --region ap-northeast-1
+```
+
+Each tool logs its start, decisions, and results. Example output:
+
+```
+============================================================
+[tool:start] generate_mv_concept
+  対象画像: 3枚
+[tool:done] generate_mv_concept
+  → コンセプト: A cinematic journey through sun-drenched streets...
+============================================================
+[tool:start] produce_music_video
+  [絵コンテ完成] 3カット / 総尺 24秒
+    cut1: 8秒 [✓ リップシンク対象] portrait of woman looking directly at camera...
+    cut2: 8秒 [  映像のみ        ] panoramic view of golden hills at sunset...
+[tool:done] produce_music_video
+  → S3 URI: s3://agentcore-mv-director-<ACCOUNT_ID>/output/mv.mp4
 ```
 
 ## Tear down (avoid lingering cost)
