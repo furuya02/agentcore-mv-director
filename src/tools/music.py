@@ -16,7 +16,7 @@ def generate_music(prompt: str, lyrics: str, length_ms: int) -> Path:
 
     # prompt に作詞済み歌詞を含めて歌入りで生成（force_instrumental=False）
     body = {
-        "prompt": f"{prompt}\nLyrics:\n{lyrics}",
+        "prompt": f"{prompt}, vocals start within the first 8 seconds\nLyrics:\n{lyrics}",
         "music_length_ms": length_ms,
         "model_id": "music_v2",
         "force_instrumental": False,
