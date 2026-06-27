@@ -1,0 +1,22 @@
+{
+  "name": "agentcore-mv-director-cdk",
+  "version": "0.1.0",
+  "private": true,
+  "bin": { "app": "bin/app.ts" },
+  "scripts": {
+    "cdk": "cdk",
+    "synth": "cdk synth",
+    "deploy": "cdk deploy",
+    "destroy": "cdk destroy"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "aws-cdk": "^2",
+    "ts-node": "^10",
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2",
+    "constructs": "^10"
+  }
+}

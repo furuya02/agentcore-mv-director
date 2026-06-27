@@ -1,0 +1,59 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "run [DRY]: コンセプトのみ（スタブ）",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "scripts.run",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.env",
+      "env": { "DRY_RUN": "1" },
+      "args": ["夜の東京を舞台にしたシティポップのMV"]
+    },
+    {
+      "name": "run [DRY]: --image + --extend（1枚→i2v＋延長）",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "scripts.run",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.env",
+      "env": { "DRY_RUN": "1" },
+      "args": [
+        "夜の東京を舞台にしたシティポップのMV",
+        "--image", "input/first.png",
+        "--extend", "2",
+        "--vocal", "female"
+      ]
+    },
+    {
+      "name": "run [DRY]: --images（複数画像ディレクトリ）",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "scripts.run",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.env",
+      "env": { "DRY_RUN": "1" },
+      "args": [
+        "夜の東京を舞台にしたシティポップのMV",
+        "--images", "input",
+        "--ai-lyrics",
+        "--vocal", "male"
+      ]
+    },
+    {
+      "name": "run [DRY]: 引数を都度入力",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "scripts.run",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.env",
+      "env": { "DRY_RUN": "1" },
+      "args": "${command:pickArgs}"
+    }
+  ]
+}
