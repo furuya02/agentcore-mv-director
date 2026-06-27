@@ -59,14 +59,6 @@ def _order_key(p: Path):
     return (int(m.group()) if m else 10**9, p.name)
 
 
-def _download_file(s3_uri: str, dest: Path) -> Path:
-    """s3://bucket/key をダウンロードして dest に保存する。"""
-    without_scheme = s3_uri[len("s3://"):]
-    bucket, key = without_scheme.split("/", 1)
-    boto3.client("s3").download_file(bucket, key, str(dest))
-    return dest
-
-
 def _download_prefix(s3_prefix: str, dest_dir: Path) -> list[Path]:
     """s3://bucket/prefix/ 以下の画像ファイルをすべてダウンロードして返す。"""
     without_scheme = s3_prefix[len("s3://"):]
