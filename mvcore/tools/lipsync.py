@@ -6,7 +6,7 @@
 import time
 import httpx
 from pathlib import Path
-from ..config import DRY_RUN, FAL_KEY, OUTPUT_DIR, write_placeholder, reuse_existing
+from ..config import FAL_KEY, OUTPUT_DIR
 from ._fal import video_url
 
 MODEL = "fal-ai/kling-video/lipsync/audio-to-video"
@@ -16,11 +16,6 @@ QUEUE = "https://queue.fal.run"
 def lipsync(video: Path, audio: Path, n: int) -> Path:
     """歌唱カットに口元同期を適用して返す。"""
     out = OUTPUT_DIR / f"cut{n}_lipsync.mp4"
-    if reuse_existing(out):
-        return out
-    if DRY_RUN or not FAL_KEY:
-        return write_placeholder(out, f"Kling LipSync: {video.name} + {audio.name} (full mix)")
-
     headers = {"Authorization": f"Key {FAL_KEY}"}
     payload = {"video_url": _upload(video), "audio_url": _upload(audio)}
     res = httpx.post(f"{QUEUE}/{MODEL}", headers=headers, json=payload, timeout=60)

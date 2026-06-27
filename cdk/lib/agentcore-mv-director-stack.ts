@@ -15,8 +15,6 @@ export class AgentcoreMvDirectorStack extends Stack {
     // 命名規約: {プロジェクト名}-{アカウントID}。-c bucket_suffix=YYYYMMDD で差し替え可（差し替えた場合はその値を使用）。
     const suffix: string = this.node.tryGetContext("bucket_suffix") ?? this.account;
 
-    const dryRun: string = this.node.tryGetContext("dry_run") ?? "0";
-
     // 完成MVの出力先（放置コスト回避: 破棄しやすく）
     const bucket = new s3.Bucket(this, "MvBucket", {
       bucketName: `${PROJECT}-${suffix}`,
@@ -74,7 +72,6 @@ export class AgentcoreMvDirectorStack extends Stack {
       agentRuntimeArtifact: artifact,
       executionRole: role,
       environmentVariables: {
-        DRY_RUN: dryRun,
         S3_BUCKET: bucket.bucketName,
         SECRET_ARN: secret.secretArn,
         OUTPUT_DIR: "/tmp/output",
